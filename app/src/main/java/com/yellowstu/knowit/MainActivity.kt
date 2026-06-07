@@ -3,7 +3,6 @@ package com.yellowstu.knowit
 import android.app.AlertDialog
 import android.os.Bundle
 import android.widget.Button
-import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.lifecycleScope
@@ -17,7 +16,7 @@ import java.net.URLConnection
 class MainActivity : ComponentActivity() {
 
     private lateinit var speedValueText: TextView
-    private lateinit var speedGauge: ProgressBar
+    private lateinit var speedGauge: SpeedGaugeView
     private lateinit var runTestButton: Button
     private lateinit var aboutButton: Button
 
@@ -45,8 +44,9 @@ class MainActivity : ComponentActivity() {
     private fun startSpeedTest() {
         runTestButton.isEnabled = false
         runTestButton.text = "ANALYZING WIRES..."
-        speedValueText.text = "0.00"
-        speedGauge.progress = 0
+        runTestButton.alpha = 0.5f // Visual feedback for disabled state
+        speedValueText.text = "0.0"
+        speedGauge.setProgress(0f)
 
         lifecycleScope.launch {
             try {
@@ -55,21 +55,21 @@ class MainActivity : ComponentActivity() {
                 val dynamicUrl = "$testFileUrl&nocache=${System.currentTimeMillis()}"
                 
                 val finalSpeed = runDownloadTest(dynamicUrl) { currentMbps ->
-                    speedValueText.text = String.format("%.2f", currentMbps)
-                    // Scale gauge (assuming max 100 Mbps for visual representation)
-                    val progress = (currentMbps.coerceIn(0.0, 100.0)).toInt()
-                    speedGauge.progress = progress
+                    speedValueText.text = String.format("%.1f", currentMbps)
+                    speedGauge.setProgress(currentMbps.toFloat())
                 }
 
-                speedValueText.text = String.format("%.2f", finalSpeed)
+                speedValueText.text = String.format("%.1f", finalSpeed)
                 runTestButton.text = "RUN SPEED TEST"
                 runTestButton.isEnabled = true
+                runTestButton.alpha = 1.0f
                 
             } catch (e: Exception) {
-                speedValueText.text = "0.00"
-                speedGauge.progress = 0
+                speedValueText.text = "0.0"
+                speedGauge.setProgress(0f)
                 runTestButton.text = "RUN SPEED TEST"
                 runTestButton.isEnabled = true
+                runTestButton.alpha = 1.0f
             }
         }
     }
@@ -112,19 +112,28 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun showAboutDialog() {
-        val builder = AlertDialog.Builder(this)
+        val builder = AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Light_Dialog_Alert)
+        
+        // Customizing the title and message with basic styling if needed, 
+        // but DeviceDefault_Light usually matches the screenshot well.
         builder.setTitle("Project Intelligence")
-        builder.setMessage(
-            "Yellow sTudios\n" +
-            "Founder: notrazx\n" +
-            "Instagram: yellowstudios.f\n" +
-            "Contact: userprivateitd@gmail.com\n\n" +
-            "Licensed under MIT - A dedicated one-member performance matrix."
-        )
+        
+        val message = "Yellow sTudios Founder: notrazx\n" +
+                      "Instagram: yellowstudios.f\n\n" +
+                      "Contact: userprivateltd@gmail.com\n" +
+                      "Licensed under MIT\n\n" +
+                      "A dedicated one-member performance matrix."
+                      
+        builder.setMessage(message)
+        
         builder.setPositiveButton("CLOSE") { dialog, _ ->
             dialog.dismiss()
         }
+        
         val dialog = builder.create()
         dialog.show()
+        
+        // Styling the button color to match the screenshot (blue-ish) after showing
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(android.graphics.Color.parseColor("#00BCD4"))
     }
 }
