@@ -1,11 +1,12 @@
 package com.yellowstu.knowit
 
-import androidx.activity.ComponentActivity
-import androidx.lifecycle.lifecycleScope
+import android.app.AlertDialog
 import android.os.Bundle
 import android.widget.Button
-import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.activity.ComponentActivity
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -15,55 +16,69 @@ import java.net.URLConnection
 
 class MainActivity : ComponentActivity() {
 
-    private lateinit var speedTextView: TextView
-    private lateinit var testButton: Button
+    private lateinit var speedValueText: TextView
+    private lateinit var speedGauge: ProgressBar
+    private lateinit var runTestButton: Button
+    private lateinit var aboutButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
 
-        // Creating a simple layout programmatically to completely bypass R.layout dependency errors
-        val linearLayout = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(50, 50, 50, 50)
-            gravity = android.view.Gravity.CENTER
+        // UI Binding
+        speedValueText = findViewById(R.id.speedValueText)
+        speedGauge = findViewById(R.id.speedGauge)
+        runTestButton = findViewById(R.id.runTestButton)
+        aboutButton = findViewById(R.id.aboutButton)
+
+        // Run Speed Test Button Click Listener
+        runTestButton.setOnClickListener {
+            startSpeedTest()
         }
 
-        speedTextView = TextView(this).apply {
-            text = "0.00 Mbps"
-            textSize = 32f
-            setPadding(0, 0, 0, 50)
+        // About Project Button Click Listener
+        aboutButton.setOnClickListener {
+            showAboutDialog()
         }
+    }
 
-        testButton = Button(this).apply {
-            text = "Test Internet Speed"
-        }
+    private fun startSpeedTest() {
+        runTestButton.isEnabled = false
+        runTestButton.text = "ANALYZING WIRES..."
+        speedValueText.text = "0.00"
+        speedGauge.progress = 0
 
-        linearLayout.addView(speedTextView)
-        linearLayout.addView(testButton)
-        setContentView(linearLayout)
-
-        testButton.setOnClickListener {
-            testButton.isEnabled = false
-            speedTextView.text = "Testing Network Speed..."
-            
-            lifecycleScope.launch {
-                val testFileUrl = "https://speed.cloudflare.com/__down?bytes=5000000" 
+        lifecycleScope.launch {
+            try {
+                // Stable endpoint with cache-busting
+                val testFileUrl = "https://speed.cloudflare.com/__down?bytes=5000000"
+                val dynamicUrl = "$testFileUrl&nocache=${System.currentTimeMillis()}"
                 
-                val finalSpeed = runSpeedTest(testFileUrl) { currentSpeed ->
-                    speedTextView.text = String.format("%.2f Mbps", currentSpeed)
+                val finalSpeed = runDownloadTest(dynamicUrl) { currentMbps ->
+                    speedValueText.text = String.format("%.2f", currentMbps)
+                    // Scale gauge (assuming max 100 Mbps for visual representation)
+                    val progress = (currentMbps.coerceIn(0.0, 100.0)).toInt()
+                    speedGauge.progress = progress
                 }
+
+                speedValueText.text = String.format("%.2f", finalSpeed)
+                runTestButton.text = "RUN SPEED TEST"
+                runTestButton.isEnabled = true
                 
-                speedTextView.text = String.format("Final Speed: %.2f Mbps", finalSpeed)
-                testButton.isEnabled = true
+            } catch (e: Exception) {
+                speedValueText.text = "0.00"
+                speedGauge.progress = 0
+                runTestButton.text = "RUN SPEED TEST"
+                runTestButton.isEnabled = true
             }
         }
     }
 
-    private suspend fun runSpeedTest(downloadUrl: String, onProgress: (Double) -> Unit): Double {
+    private suspend fun runDownloadTest(urlString: String, onProgress: (Double) -> Unit): Double {
         return withContext(Dispatchers.IO) {
             try {
-                val uniqueUrl = URL("$downloadUrl&nocache=${System.currentTimeMillis()}")
-                val connection: URLConnection = uniqueUrl.openConnection()
+                val url = URL(urlString)
+                val connection: URLConnection = url.openConnection()
                 connection.connect()
 
                 val startTime = System.currentTimeMillis()
@@ -74,20 +89,42 @@ class MainActivity : ComponentActivity() {
 
                 while (inputStream.read(buffer).also { bytesRead = it } != -1) {
                     totalBytesRead += bytesRead
-                    val timePassed = (System.currentTimeMillis() - startTime) / 1000.0
-                    if (timePassed > 0) {
-                        val currentSpeedMbps = (totalBytesRead * 8) / 1000000.0 / timePassed
+                    val currentTime = System.currentTimeMillis()
+                    val timePassedInSeconds = (currentTime - startTime) / 1000.0
+                    
+                    if (timePassedInSeconds > 0) {
+                        // bits per second conversion: (bytes * 8) / 1,000,000 / seconds
+                        val currentMbps = (totalBytesRead * 8.0) / 1000000.0 / timePassedInSeconds
+                        
                         withContext(Dispatchers.Main) {
-                            onProgress(currentSpeedMbps)
+                            onProgress(currentMbps)
                         }
                     }
                 }
                 inputStream.close()
+
                 val totalTime = (System.currentTimeMillis() - startTime) / 1000.0
-                return@withContext (totalBytesRead * 8) / 1000000.0 / totalTime
+                return@withContext (totalBytesRead * 8.0) / 1000000.0 / totalTime
             } catch (e: Exception) {
-                return@withContext 0.0 
+                return@withContext 0.0
             }
         }
+    }
+
+    private fun showAboutDialog() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Project Intelligence")
+        builder.setMessage(
+            "Yellow sTudios\n" +
+            "Founder: notrazx\n" +
+            "Instagram: yellowstudios.f\n" +
+            "Contact: userprivateitd@gmail.com\n\n" +
+            "Licensed under MIT - A dedicated one-member performance matrix."
+        )
+        builder.setPositiveButton("CLOSE") { dialog, _ ->
+            dialog.dismiss()
+        }
+        val dialog = builder.create()
+        dialog.show()
     }
 }
