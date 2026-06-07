@@ -92,3 +92,4 @@ class MainActivity : Activity() {
         }
     }
 }
+"fix: use basic Activity to resolve appcompat compilation errors"
