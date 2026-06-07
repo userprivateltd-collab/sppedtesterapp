@@ -1,36 +1,56 @@
+package com.yellowstu.knowit
+
+import android.app.Activity
 import android.os.Bundle
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.InputStream
 import java.net.URL
 import java.net.URLConnection
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : Activity() {
 
     private lateinit var speedTextView: TextView
     private lateinit var testButton: Button
+    private val mainScope = CoroutineScope(Dispatchers.Main)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
 
-        speedTextView = findViewById(R.id.speedTextView)
-        testButton = findViewById(R.id.testButton)
+        // Creating a simple layout programmatically to completely bypass R.layout dependency errors
+        val linearLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(50, 50, 50, 50)
+            gravity = android.view.Gravity.CENTER
+        }
+
+        speedTextView = TextView(this).apply {
+            text = "0.00 Mbps"
+            textSize = 32f
+            setPadding(0, 0, 0, 50)
+        }
+
+        testButton = Button(this).apply {
+            text = "Test Internet Speed"
+        }
+
+        linearLayout.addView(speedTextView)
+        linearLayout.addView(testButton)
+        setContentView(linearLayout)
 
         testButton.setOnClickListener {
             testButton.isEnabled = false
-            speedTextView.text = "Testing..."
+            speedTextView.text = "Testing Network Speed..."
             
-            // Launching the network request safely on a background thread
-            lifecycleScope.launch {
-                // Using a reliable, small public file link for testing
+            mainScope.launch {
                 val testFileUrl = "https://speed.cloudflare.com/__down?bytes=5000000" 
                 
                 val finalSpeed = runSpeedTest(testFileUrl) { currentSpeed ->
-                    // Update text in real-time as bytes stream down
                     speedTextView.text = String.format("%.2f Mbps", currentSpeed)
                 }
                 
@@ -41,9 +61,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private suspend fun runSpeedTest(downloadUrl: String, onProgress: (Double) -> Unit): Double {
-        return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+        return withContext(Dispatchers.IO) {
             try {
-                // The cache-buster parameter handles the offline bug
                 val uniqueUrl = URL("$downloadUrl&nocache=${System.currentTimeMillis()}")
                 val connection: URLConnection = uniqueUrl.openConnection()
                 connection.connect()
@@ -59,7 +78,7 @@ class MainActivity : AppCompatActivity() {
                     val timePassed = (System.currentTimeMillis() - startTime) / 1000.0
                     if (timePassed > 0) {
                         val currentSpeedMbps = (totalBytesRead * 8) / 1000000.0 / timePassed
-                        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        withContext(Dispatchers.Main) {
                             onProgress(currentSpeedMbps)
                         }
                     }
@@ -68,7 +87,7 @@ class MainActivity : AppCompatActivity() {
                 val totalTime = (System.currentTimeMillis() - startTime) / 1000.0
                 return@withContext (totalBytesRead * 8) / 1000000.0 / totalTime
             } catch (e: Exception) {
-                return@withContext 0.0 // Forces 0 Mbps if connection fails or drops
+                return@withContext 0.0 
             }
         }
     }
