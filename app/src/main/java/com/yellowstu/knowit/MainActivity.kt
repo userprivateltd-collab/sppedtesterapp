@@ -1,11 +1,11 @@
 package com.yellowstu.knowit
 
-import android.app.Activity
+import androidx.activity.ComponentActivity
+import androidx.lifecycle.lifecycleScope
 import android.os.Bundle
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -13,11 +13,10 @@ import java.io.InputStream
 import java.net.URL
 import java.net.URLConnection
 
-class MainActivity : Activity() {
+class MainActivity : ComponentActivity() {
 
     private lateinit var speedTextView: TextView
     private lateinit var testButton: Button
-    private val mainScope = CoroutineScope(Dispatchers.Main)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,7 +46,7 @@ class MainActivity : Activity() {
             testButton.isEnabled = false
             speedTextView.text = "Testing Network Speed..."
             
-            mainScope.launch {
+            lifecycleScope.launch {
                 val testFileUrl = "https://speed.cloudflare.com/__down?bytes=5000000" 
                 
                 val finalSpeed = runSpeedTest(testFileUrl) { currentSpeed ->
