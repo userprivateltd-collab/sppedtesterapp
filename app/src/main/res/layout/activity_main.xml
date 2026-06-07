@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="24dp"
+    android:background="#0A0A0A"
+    tools:context=".MainActivity">
+
+    <!-- Circular Gauge / Progress Area -->
+    <FrameLayout
+        android:id="@+id/gaugeContainer"
+        android:layout_width="280dp"
+        android:layout_height="280dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="60dp">
+
+        <ProgressBar
+            android:id="@+id/speedGauge"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/gauge_background"
+            android:indeterminate="false"
+            android:max="100"
+            android:progress="0"
+            android:progressDrawable="@drawable/circular_progress_drawable" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/speedValueText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0.00"
+                android:textColor="#FFFFFF"
+                android:textSize="48sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mbps"
+                android:textColor="#888888"
+                android:textSize="18sp" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <!-- Run Test Button -->
+    <Button
+        android:id="@+id/runTestButton"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_below="@id/gaugeContainer"
+        android:layout_marginTop="80dp"
+        android:backgroundTint="#00E676"
+        android:text="RUN SPEED TEST"
+        android:textColor="#000000"
+        android:textStyle="bold" />
+
+    <!-- About Button -->
+    <Button
+        android:id="@+id/aboutButton"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:text="ABOUT THE PROJECT"
+        android:textColor="#00E676"
+        android:textSize="12sp" />
+
+</RelativeLayout>
