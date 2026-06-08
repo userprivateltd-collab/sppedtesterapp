@@ -1,5 +1,8 @@
 package com.yellowstu.knowit
 
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.MobileAds
 import android.app.AlertDialog
 import android.os.Bundle
 import android.widget.Button
@@ -19,10 +22,20 @@ class MainActivity : ComponentActivity() {
     private lateinit var speedGauge: SpeedGaugeView
     private lateinit var runTestButton: Button
     private lateinit var aboutButton: Button
+    private lateinit var adView: AdView
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        // Initialize AdMob SDK
+        MobileAds.initialize(this) {}
+
+        // Find and load the banner ad
+        adView = findViewById(R.id.adView)
+        val adRequest = AdRequest.Builder().build()
+        adView.loadAd(adRequest)
+
 
         // UI Binding
         speedValueText = findViewById(R.id.speedValueText)
@@ -135,5 +148,19 @@ class MainActivity : ComponentActivity() {
         
         // Styling the button color to match the screenshot (blue-ish) after showing
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(android.graphics.Color.parseColor("#00BCD4"))
+    }     override fun onPause() {
+        adView.pause()
+        super.onPause()
     }
+
+    override fun onResume() {
+        super.onResume()
+        adView.resume()
+    }
+
+    override fun onDestroy() {
+        adView.destroy()
+        super.onDestroy()
+    }
+
 }

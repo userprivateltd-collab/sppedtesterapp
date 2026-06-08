@@ -13,6 +13,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Knowit">
+
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-9089902707599727~5161690316"/>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
