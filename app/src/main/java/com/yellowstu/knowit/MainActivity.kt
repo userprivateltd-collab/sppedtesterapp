@@ -4,9 +4,14 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
 import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
+import android.widget.ImageView
+import android.widget.Switch
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
@@ -20,14 +25,21 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var speedValueText: TextView
     private lateinit var speedGauge: SpeedGaugeView
+    private lateinit var speedGraph: LineGraphView
     private lateinit var runTestButton: Button
-    private lateinit var aboutButton: Button
+    private lateinit var settingsBtn: ImageView
     private lateinit var adView: AdView
-
+    private lateinit var visibilitySwitch: Switch
+    
+    // Bottom Nav
+    private lateinit var navGrid: ImageView
+    private lateinit var navCompass: ImageView
+    private lateinit var navShare: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        
         // Initialize AdMob SDK
         MobileAds.initialize(this) {}
 
@@ -36,51 +48,74 @@ class MainActivity : ComponentActivity() {
         val adRequest = AdRequest.Builder().build()
         adView.loadAd(adRequest)
 
-
         // UI Binding
         speedValueText = findViewById(R.id.speedValueText)
         speedGauge = findViewById(R.id.speedGauge)
+        speedGraph = findViewById(R.id.speedGraph)
         runTestButton = findViewById(R.id.runTestButton)
-        aboutButton = findViewById(R.id.aboutButton)
+        settingsBtn = findViewById(R.id.settingsBtn)
+        visibilitySwitch = findViewById(R.id.visibilitySwitch)
+        
+        navGrid = findViewById(R.id.navGrid)
+        navCompass = findViewById(R.id.navCompass)
+        navShare = findViewById(R.id.navShare)
 
         // Run Speed Test Button Click Listener
         runTestButton.setOnClickListener {
             startSpeedTest()
         }
 
-        // About Project Button Click Listener
-        aboutButton.setOnClickListener {
+        // Settings/About Button Click Listener
+        settingsBtn.setOnClickListener {
             showAboutDialog()
+        }
+
+        // Visibility Switch Listener
+        visibilitySwitch.setOnCheckedChangeListener { _, isChecked ->
+            adView.visibility = if (isChecked) View.VISIBLE else View.GONE
+        }
+
+        // Bottom Nav Listeners
+        navGrid.setOnClickListener {
+            Toast.makeText(this, "Grid View", Toast.LENGTH_SHORT).show()
+        }
+        navCompass.setOnClickListener {
+            Toast.makeText(this, "Home", Toast.LENGTH_SHORT).show()
+        }
+        navShare.setOnClickListener {
+            shareResults()
         }
     }
 
     private fun startSpeedTest() {
         runTestButton.isEnabled = false
-        runTestButton.text = "ANALYZING WIRES..."
-        runTestButton.alpha = 0.5f // Visual feedback for disabled state
+        runTestButton.text = "ANALYZING..."
+        runTestButton.alpha = 0.5f 
         speedValueText.text = "0.0"
-        speedGauge.setProgress(0f)
+        speedGauge.setSpeed(0f)
+        speedGraph.clear()
 
         lifecycleScope.launch {
             try {
                 // Stable endpoint with cache-busting
-                val testFileUrl = "https://speed.cloudflare.com/__down?bytes=5000000"
+                val testFileUrl = "https://speed.cloudflare.com/__down?bytes=10000000"
                 val dynamicUrl = "$testFileUrl&nocache=${System.currentTimeMillis()}"
                 
                 val finalSpeed = runDownloadTest(dynamicUrl) { currentMbps ->
                     speedValueText.text = String.format("%.1f", currentMbps)
-                    speedGauge.setProgress(currentMbps.toFloat())
+                    speedGauge.setSpeed(currentMbps.toFloat())
+                    speedGraph.addDataPoint(currentMbps.toFloat())
                 }
 
                 speedValueText.text = String.format("%.1f", finalSpeed)
-                runTestButton.text = "RUN SPEED TEST"
+                runTestButton.text = "START TEST"
                 runTestButton.isEnabled = true
                 runTestButton.alpha = 1.0f
                 
             } catch (e: Exception) {
                 speedValueText.text = "0.0"
-                speedGauge.setProgress(0f)
-                runTestButton.text = "RUN SPEED TEST"
+                speedGauge.setSpeed(0f)
+                runTestButton.text = "START TEST"
                 runTestButton.isEnabled = true
                 runTestButton.alpha = 1.0f
             }
@@ -96,7 +131,7 @@ class MainActivity : ComponentActivity() {
 
                 val startTime = System.currentTimeMillis()
                 val inputStream: InputStream = connection.getInputStream()
-                val buffer = ByteArray(1024)
+                val buffer = ByteArray(8192)
                 var bytesRead: Int
                 var totalBytesRead = 0L
 
@@ -106,9 +141,7 @@ class MainActivity : ComponentActivity() {
                     val timePassedInSeconds = (currentTime - startTime) / 1000.0
                     
                     if (timePassedInSeconds > 0) {
-                        // bits per second conversion: (bytes * 8) / 1,000,000 / seconds
                         val currentMbps = (totalBytesRead * 8.0) / 1000000.0 / timePassedInSeconds
-                        
                         withContext(Dispatchers.Main) {
                             onProgress(currentMbps)
                         }
@@ -124,31 +157,35 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun shareResults() {
+        val speed = speedValueText.text.toString()
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_SUBJECT, "My Speed Test Result")
+            putExtra(Intent.EXTRA_TEXT, "I just tested my internet speed with KnowIt! My speed is $speed Mbps. #SpeedTest #KnowIt")
+        }
+        startActivity(Intent.createChooser(shareIntent, "Share your speed"))
+    }
+
     private fun showAboutDialog() {
-        val builder = AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Light_Dialog_Alert)
-        
-        // Customizing the title and message with basic styling if needed, 
-        // but DeviceDefault_Light usually matches the screenshot well.
+        val builder = AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
         builder.setTitle("Project Intelligence")
         
-        val message = "Yellow sTudios Founder: notrazx\n" +
+        val message = "Developed by Yellow sTudios\n" +
+                      "Founder: notrazx\n" +
                       "Instagram: yellowstudios.f\n\n" +
                       "Contact: userprivateltd@gmail.com\n" +
-                      "Licensed under MIT\n\n" +
-                      "A dedicated one-member performance matrix."
+                      "Licensed under MIT"
                       
         builder.setMessage(message)
-        
-        builder.setPositiveButton("CLOSE") { dialog, _ ->
-            dialog.dismiss()
-        }
+        builder.setPositiveButton("CLOSE") { dialog, _ -> dialog.dismiss() }
         
         val dialog = builder.create()
         dialog.show()
-        
-        // Styling the button color to match the screenshot (blue-ish) after showing
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(android.graphics.Color.parseColor("#00BCD4"))
-    }     override fun onPause() {
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(android.graphics.Color.parseColor("#00E5FF"))
+    }
+
+    override fun onPause() {
         adView.pause()
         super.onPause()
     }
@@ -162,5 +199,4 @@ class MainActivity : ComponentActivity() {
         adView.destroy()
         super.onDestroy()
     }
-
 }

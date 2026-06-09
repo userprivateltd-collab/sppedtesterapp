@@ -1,124 +1,301 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
-    android:padding="20dp"
-    tools:context=".MainActivity">
+    android:background="@color/bg_dark"
+    android:padding="20dp">
 
-    <LinearLayout
-        android:id="@+id/header"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+    <!-- Top Navigation -->
+    <RelativeLayout
+        android:id="@+id/topNav"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Yellow sTudios"
-            android:textColor="#7A7E8C"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+        <ImageView
+            android:id="@+id/settingsBtn"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@android:drawable/ic_menu_preferences"
+            android:tint="@color/accent_cyan" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Network Matrix"
-            android:textColor="#000000"
-            android:textSize="24sp"
+            android:layout_centerHorizontal="true"
+            android:text="SpeedTest"
+            android:textColor="@color/accent_cyan"
+            android:textSize="20sp"
             android:textStyle="bold" />
-    </LinearLayout>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:background="@drawable/badge_background"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="8dp"
-        android:text="v1.0 Native"
-        android:textColor="#000000"
-        android:textSize="14sp"
-        android:textStyle="bold" />
-
-    <FrameLayout
-        android:id="@+id/gaugeArea"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
-        android:layout_centerInParent="true">
-
-        <com.yellowstu.knowit.SpeedGaugeView
-            android:id="@+id/speedGauge"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
+            android:layout_alignParentEnd="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SIGNAL\nQUALITY"
+                android:textColor="@color/text_grey"
+                android:textSize="8sp" />
+
+            <View
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:layout_marginStart="4dp"
+                android:background="@color/status_good" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/bottomNavContainer"
+        android:layout_below="@id/topNav"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <!-- Status Badge -->
             <TextView
-                android:id="@+id/speedValueText"
+                android:id="@+id/statusBadge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="0.0"
-                android:textColor="#1A1C2E"
-                android:textSize="72sp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/badge_background"
+                android:paddingHorizontal="40dp"
+                android:paddingVertical="10dp"
+                android:text="GOOD"
+                android:textColor="@color/accent_cyan"
+                android:textSize="28sp"
                 android:textStyle="bold" />
 
-            <TextView
-                android:layout_width="wrap_content"
+            <!-- Gauge Area -->
+            <FrameLayout
+                android:id="@+id/gaugeArea"
+                android:layout_width="320dp"
+                android:layout_height="320dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="10dp">
+
+                <com.yellowstu.knowit.SpeedGaugeView
+                    android:id="@+id/speedGauge"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/speedValueText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0.0"
+                        android:textColor="@color/accent_cyan"
+                        android:textSize="68sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="MBPS"
+                        android:textColor="@color/text_grey"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </FrameLayout>
+
+            <!-- Metrics Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Mbps"
-                android:textColor="#7A7E8C"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/card_background"
+                    android:gravity="center_vertical"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@android:drawable/ic_dialog_map"
+                        android:tint="@color/accent_cyan" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="LATENCY"
+                            android:textColor="@color/text_grey"
+                            android:textSize="10sp" />
+
+                        <TextView
+                            android:id="@+id/latencyText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="29 ms"
+                            android:textColor="@color/white"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/card_background"
+                    android:gravity="center_vertical"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@android:drawable/ic_menu_view"
+                        android:tint="@color/accent_purple" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:text="VISIBILITY"
+                        android:textColor="@color/text_grey"
+                        android:textSize="10sp" />
+
+                    <Switch
+                        android:id="@+id/visibilitySwitch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:thumbTint="@color/white"
+                        android:trackTint="@color/accent_purple" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Graph Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="UPLOAD"
+                        android:textColor="@color/text_grey"
+                        android:textSize="10sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:text="DOWNLOAD"
+                        android:textColor="@color/text_grey"
+                        android:textSize="10sp" />
+                </RelativeLayout>
+
+                <com.yellowstu.knowit.LineGraphView
+                    android:id="@+id/speedGraph"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp" />
+            </LinearLayout>
+
+            <com.google.android.gms.ads.AdView
+                android:id="@+id/adView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_gravity="center_horizontal"
+                app:adSize="BANNER"
+                app:adUnitId="ca-app-pub-9089902707599727/4669067421" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="200dp" />
+
         </LinearLayout>
-    </FrameLayout>
+    </ScrollView>
 
+    <!-- Bottom Navigation and Controls -->
     <LinearLayout
-        android:id="@+id/buttonContainer"
+        android:id="@+id/bottomNavContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/adView"
-        android:layout_marginBottom="10dp"
-        android:orientation="vertical">
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical"
+        android:background="@color/bg_dark">
 
         <Button
             android:id="@+id/runTestButton"
             android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:background="@drawable/dark_button_bg"
-            android:stateListAnimator="@null"
-            android:text="RUN SPEED TEST"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
+            android:layout_height="60dp"
+            android:backgroundTint="@color/accent_cyan"
+            android:text="START TEST"
+            android:textColor="@color/bg_dark"
             android:textStyle="bold" />
 
-        <Button
-            android:id="@+id/aboutButton"
-            style="?android:attr/borderlessButtonStyle"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/outlined_button_bg"
-            android:text="ABOUT THE PROJECT"
-            android:textColor="#7A7E8C"
-            android:textSize="14sp"
-            android:textStyle="bold" />
-    </LinearLayout>
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingBottom="10dp">
 
-    <com.google.android.gms.ads.AdView
-        android:id="@+id/adView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        app:adSize="BANNER"
-        app:adUnitId="ca-app-pub-9089902707599727/4669067421" />
+            <ImageView
+                android:id="@+id/navGrid"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginHorizontal="20dp"
+                android:src="@android:drawable/ic_menu_agenda"
+                android:tint="@color/text_grey" />
+
+            <ImageView
+                android:id="@+id/navCompass"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginHorizontal="20dp"
+                android:background="@drawable/badge_background"
+                android:padding="4dp"
+                android:src="@android:drawable/ic_menu_compass"
+                android:tint="@color/accent_cyan" />
+
+            <ImageView
+                android:id="@+id/navShare"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginHorizontal="20dp"
+                android:src="@android:drawable/ic_menu_share"
+                android:tint="@color/text_grey" />
+        </LinearLayout>
+    </LinearLayout>
 
 </RelativeLayout>
